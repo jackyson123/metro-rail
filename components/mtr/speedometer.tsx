@@ -2,9 +2,10 @@ const MAX = 100
 const START = -225
 const SWEEP = 270
 
-function polar(r: number, deg: number) {
+function polar(r: number, deg: number): [string, string] {
   const rad = (deg * Math.PI) / 180
-  return [100 + r * Math.cos(rad), 100 + r * Math.sin(rad)]
+  // Keep SVG coordinates textually identical across server and client renders.
+  return [(100 + r * Math.cos(rad)).toFixed(6), (100 + r * Math.sin(rad)).toFixed(6)]
 }
 
 function angleFor(v: number) {
