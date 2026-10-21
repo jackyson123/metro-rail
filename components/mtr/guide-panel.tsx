@@ -14,6 +14,7 @@ const KEYS = [
   ['空白鍵', '緊急制動 EB'],
   ['O', '開門'],
   ['C', '關門'],
+  ['V', '切換鏡頭（駕駛室 / 車頭外 / 月台側）'],
 ]
 
 export function GuidePanel() {

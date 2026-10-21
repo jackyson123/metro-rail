@@ -1,0 +1,49 @@
+'use client'
+
+import { useFrame, useThree } from '@react-three/fiber'
+import type { PerspectiveCamera } from 'three'
+import { inStation } from '@/lib/mtr/layout'
+import type { StateRef } from './instancing'
+
+export type CameraMode = 'cab' | 'front' | 'platform'
+
+export const CAMERA_MODES: { id: CameraMode; label: string }[] = [
+  { id: 'cab', label: '駕駛室' },
+  { id: 'front', label: '車頭外' },
+  { id: 'platform', label: '月台側' },
+]
+
+export function CameraRig({ stateRef, mode }: { stateRef: StateRef; mode: CameraMode }) {
+  const camera = useThree((s) => s.camera) as PerspectiveCamera
+
+  useFrame(() => {
+    const s = stateRef.current
+    if (!s) return
+    const z = -s.pos
+    const shake = Math.min(s.v, 25) / 25
+    const t = s.time
+    const jx = Math.sin(t * 1.7) * 0.012 * shake + Math.sin(t * 7.3) * 0.003 * shake
+    const jy = Math.sin(t * 11) * 0.006 * shake + Math.sin(t * 2.9) * 0.008 * shake
+
+    let fov = 62
+    if (mode === 'cab') {
+      camera.position.set(0.28 + jx, 2.48 + jy, z + 1.5)
+      camera.lookAt(0.12, 2.05, z - 80)
+    } else if (mode === 'front') {
+      fov = 55
+      camera.position.set(1.25, 3.05, z - 15)
+      camera.lookAt(-0.25, 2.1, z + 14)
+    } else {
+      fov = 58
+      const onPlatform = inStation(s.pos - 15) && inStation(s.pos + 30)
+      camera.position.set(onPlatform ? -4.6 : -2.25, onPlatform ? 2.75 : 2.85, z + 15)
+      camera.lookAt(onPlatform ? -1.2 : -0.5, 2.3, z - 30)
+    }
+    if (camera.fov !== fov) {
+      camera.fov = fov
+      camera.updateProjectionMatrix()
+    }
+  })
+
+  return null
+}

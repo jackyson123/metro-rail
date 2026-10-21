@@ -18,13 +18,21 @@ import {
   speedLimitAt,
   step,
 } from '@/lib/mtr/engine'
-import { CabView } from './cab-view'
+import dynamic from 'next/dynamic'
+import { CAMERA_MODES, type CameraMode } from './scene/camera-rig'
 import { GuidePanel } from './guide-panel'
 import { LineMap } from './line-map'
 import { NotchLever } from './notch-lever'
 import { ResultScreen } from './result-screen'
 import { Speedometer } from './speedometer'
 import { cn } from '@/lib/utils'
+
+const RailScene = dynamic(() => import('./scene/rail-scene').then((m) => m.RailScene), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">正在載入 3D 路綫場景…</div>
+  ),
+})
 
 type Snapshot = Pick<
   GameState,
@@ -52,6 +60,7 @@ export function Game() {
   const stateRef = useRef<GameState>(createState())
   const [started, setStarted] = useState(false)
   const [view, setView] = useState<Snapshot>(() => snap(stateRef.current))
+  const [camMode, setCamMode] = useState<CameraMode>('cab')
 
   useEffect(() => {
     if (!started) return
@@ -84,6 +93,8 @@ export function Game() {
       else if (k === ' ') act(() => setNotch(s, -8))
       else if (k === 'o') act(() => openDoors(s))
       else if (k === 'c') act(() => closeDoors(s))
+      else if (k === 'v')
+        setCamMode((m) => CAMERA_MODES[(CAMERA_MODES.findIndex((c) => c.id === m) + 1) % CAMERA_MODES.length].id)
       else return
       e.preventDefault()
     }
@@ -133,13 +144,36 @@ export function Game() {
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <div className="flex min-w-0 flex-col gap-4">
           <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl border-8 border-cab bg-background shadow-2xl md:aspect-[16/8]">
-            <CabView stateRef={stateRef} />
+            <RailScene stateRef={stateRef} mode={camMode} />
 
             <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between gap-2 p-3">
-              <div className="rounded-md bg-background/80 px-3 py-2 backdrop-blur">
-                <div className="text-[11px] text-muted-foreground">下一站 Next</div>
-                <div className="font-bold">
-                  {targetStation.zh} <span className="text-xs font-normal text-muted-foreground">{targetStation.en}</span>
+              <div className="flex flex-col items-start gap-2">
+                <div className="rounded-md bg-background/80 px-3 py-2 backdrop-blur">
+                  <div className="text-[11px] text-muted-foreground">下一站 Next</div>
+                  <div className="font-bold">
+                    {targetStation.zh} <span className="text-xs font-normal text-muted-foreground">{targetStation.en}</span>
+                  </div>
+                </div>
+                <div
+                  role="radiogroup"
+                  aria-label="鏡頭視角（按 V 切換）"
+                  className="pointer-events-auto flex rounded-md bg-background/80 p-1 backdrop-blur"
+                >
+                  {CAMERA_MODES.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={camMode === c.id}
+                      onClick={() => setCamMode(c.id)}
+                      className={cn(
+                        'rounded px-2.5 py-1 text-xs font-medium transition-colors',
+                        camMode === c.id ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1.5" aria-live="polite">
