@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { STATIONS } from '@/lib/mtr/engine'
@@ -18,7 +18,7 @@ const BUILDINGS = [
 ]
 
 export function OutdoorScenery({ stateRef }: { stateRef: StateRef }) {
-  const group = useMemo(() => new THREE.Group(), [])
+  const groupRef = useRef<THREE.Group>(null)
   const mats = useMemo(() => BUILDINGS.map((b) => new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.8 })), [])
   const windowMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#f3d37a', emissive: '#f3b942', emissiveIntensity: 0.8 }), [])
   const glassMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#6d9eaf', metalness: 0.25, roughness: 0.2, transparent: true, opacity: 0.75 }), [])
@@ -28,13 +28,15 @@ export function OutdoorScenery({ stateRef }: { stateRef: StateRef }) {
     const s = stateRef.current
     if (!s) return
     const outdoor = ![1, 3, 5].some((n) => Math.abs(s.pos - STATIONS[n].pos) < 160)
+    const group = groupRef.current
+    if (!group) return
     group.visible = outdoor
     group.position.z = -s.pos
     group.rotation.y = Math.sin(s.pos * 0.0017) * 0.035
   })
 
   return (
-    <group ref={group}>
+    <group ref={groupRef}>
       <mesh position={[0, -0.35, -130]} scale={[90, 0.2, 600]}>
         <boxGeometry args={[1, 1, 1]} />
         <primitive object={groundMat} attach="material" />
