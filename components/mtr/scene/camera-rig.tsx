@@ -20,6 +20,7 @@ export function CameraRig({ stateRef, mode }: { stateRef: StateRef; mode: Camera
     const s = stateRef.current
     if (!s) return
     const z = -s.pos
+    const bend = Math.sin(s.pos * 0.00165) * 0.32
     const shake = Math.min(s.v, 25) / 25
     const t = s.time
     const jx = Math.sin(t * 1.7) * 0.012 * shake + Math.sin(t * 7.3) * 0.003 * shake
@@ -27,12 +28,12 @@ export function CameraRig({ stateRef, mode }: { stateRef: StateRef; mode: Camera
 
     let fov = 62
     if (mode === 'cab') {
-      camera.position.set(0.28 + jx, 2.48 + jy, z + 1.5)
-      camera.lookAt(0.12, 2.05, z - 80)
+      camera.position.set(0.28 + bend + jx, 2.48 + jy, z + 1.5)
+      camera.lookAt(0.12 + bend * 2, 2.05, z - 80)
     } else if (mode === 'front') {
       fov = 55
-      camera.position.set(1.25, 3.05, z - 15)
-      camera.lookAt(-0.25, 2.1, z + 14)
+      camera.position.set(1.25 + bend, 3.05, z - 15)
+      camera.lookAt(-0.25 + bend * 2, 2.1, z + 14)
     } else {
       fov = 58
       const onPlatform = inStation(s.pos - 15) && inStation(s.pos + 30)

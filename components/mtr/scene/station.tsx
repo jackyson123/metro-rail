@@ -294,6 +294,7 @@ export function Station({
       <StaticInstances geometry={boxGeo} material={m.steel} items={items.benches} />
       <StaticInstances geometry={geo.body} material={m.people} items={items.bodies} />
       <StaticInstances geometry={geo.head} material={m.people} items={items.heads} />
+      <BoardingPassengers stateRef={stateRef} />
 
       {text && (
         <group position={[PSD_X + 0.32, 2.55, -0.6]}>
@@ -315,6 +316,34 @@ export function Station({
           <meshStandardMaterial ref={greenLamp} color="#020" emissive="#2dff7a" emissiveIntensity={0.05} toneMapped={false} />
         </mesh>
       </group>
+    </group>
+  )
+}
+
+function BoardingPassengers({ stateRef }: { stateRef: StateRef }) {
+  const people = useRef<THREE.Group>(null)
+  const positions = useMemo(() => Array.from({ length: 10 }, (_, i) => ({ x: -3.3 - (i % 2) * 0.55, z: DOOR_CENTERS[i % DOOR_CENTERS.length] + ((i % 3) - 1) * 0.8 })), [])
+  useFrame((_, dt) => {
+    const s = stateRef.current
+    if (!people.current || !s) return
+    const active = s.doorsOpen && s.phase === 'boarding'
+    people.current.visible = active
+    if (!active) return
+    people.current.children.forEach((child, i) => {
+      const p = positions[i]
+      const targetX = i % 2 ? -2.05 : -3.75
+      child.position.x += (targetX - child.position.x) * Math.min(1, dt * 1.8)
+      child.position.z = p.z + Math.sin(s.time * 2 + i) * 0.06
+    })
+  })
+  return (
+    <group ref={people}>
+      {positions.map((p, i) => (
+        <group key={i} position={[p.x, PLATFORM_Y + 0.7, p.z]}>
+          <mesh scale={[0.26, 1.3, 0.26]}><capsuleGeometry args={[0.2, 0.75, 4, 8]} /><meshStandardMaterial color={CLOTHES[i % CLOTHES.length]} roughness={0.82} /></mesh>
+          <mesh position={[0, 0.72, 0]}><sphereGeometry args={[0.15, 12, 8]} /><meshStandardMaterial color={SKIN[i % SKIN.length]} roughness={0.8} /></mesh>
+        </group>
+      ))}
     </group>
   )
 }

@@ -61,6 +61,38 @@ export function Game() {
   const [started, setStarted] = useState(false)
   const [view, setView] = useState<Snapshot>(() => snap(stateRef.current))
   const [camMode, setCamMode] = useState<CameraMode>('cab')
+  const audioRef = useRef<AudioContext | null>(null)
+  const previousDoor = useRef(false)
+  const previousSpeed = useRef(0)
+
+  useEffect(() => {
+    if (!started) return
+    const sound = (kind: 'door' | 'motor' | 'bell') => {
+      const AudioCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      if (!AudioCtor) return
+      const ctx = audioRef.current ?? new AudioCtor()
+      audioRef.current = ctx
+      if (ctx.state === 'suspended') void ctx.resume()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = kind === 'motor' ? 'sawtooth' : 'sine'
+      osc.frequency.value = kind === 'door' ? 180 : kind === 'bell' ? 880 : 72
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(kind === 'motor' ? 0.025 : 0.07, ctx.currentTime + 0.03)
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (kind === 'motor' ? 0.22 : 0.42))
+      osc.connect(gain).connect(ctx.destination)
+      osc.start()
+      osc.stop(ctx.currentTime + 0.45)
+    }
+    const s = stateRef.current
+    if (s.doorsOpen !== previousDoor.current) {
+      sound('door')
+      sound('bell')
+      previousDoor.current = s.doorsOpen
+    }
+    if (s.v > 0.7 && previousSpeed.current <= 0.7) sound('motor')
+    previousSpeed.current = s.v
+  }, [started, view.time])
 
   useEffect(() => {
     if (!started) return

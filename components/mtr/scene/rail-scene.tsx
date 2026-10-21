@@ -12,6 +12,7 @@ import { CabInterior } from './cab-interior'
 import { CameraRig, type CameraMode } from './camera-rig'
 import type { StateRef } from './instancing'
 import { Lights } from './lights'
+import { OutdoorScenery } from './outdoor-scenery'
 import { Station } from './station'
 import { Track } from './track'
 import { Train } from './train'
@@ -73,6 +74,7 @@ export const RailScene = memo(function RailScene({ stateRef, mode }: { stateRef:
       </Environment>
 
       <Tunnel stateRef={stateRef} family={family} />
+      <OutdoorScenery stateRef={stateRef} />
       <Track stateRef={stateRef} />
       <Suspense fallback={null}>
         {STATION_BOXES.map((b) => (
