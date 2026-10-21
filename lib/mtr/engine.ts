@@ -282,5 +282,6 @@ export function currentHint(
     return { title: `前方限速 ${zone.limit} km/h`, body: `${Math.round(zone.start - s.pos)} 米後進入彎道限速區，請提早制動減速。` }
   }
   if (speed > speedLimitAt(s.pos) - 3) return { title: '接近限速', body: '將主控制器拉回 N（惰行）保持速度，避免超速。' }
-  return { title: '行車中', body: '加速至接近限速後回 N 惰行，留意前方限速及車站距離。' }
+    return { title: '行車中', body: '加速至接近限速後回 N 惰行，留意前方限速及車站距離。進入彎道或月台前可按 H 鳴笛。' }
+
 }

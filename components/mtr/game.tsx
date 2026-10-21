@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { DoorClosed, DoorOpen, Minus, OctagonAlert, Plus, RotateCcw } from 'lucide-react'
+import { DoorClosed, DoorOpen, Minus, OctagonAlert, Plus, RotateCcw, Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   type GameState,
@@ -64,10 +64,11 @@ export function Game() {
   const audioRef = useRef<AudioContext | null>(null)
   const previousDoor = useRef(false)
   const previousSpeed = useRef(0)
+  const [hornPulse, setHornPulse] = useState(0)
 
   useEffect(() => {
     if (!started) return
-    const sound = (kind: 'door' | 'motor' | 'bell') => {
+    const sound = (kind: 'door' | 'motor' | 'bell' | 'horn') => {
       const AudioCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
       if (!AudioCtor) return
       const ctx = audioRef.current ?? new AudioCtor()
@@ -75,14 +76,14 @@ export function Game() {
       if (ctx.state === 'suspended') void ctx.resume()
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
-      osc.type = kind === 'motor' ? 'sawtooth' : 'sine'
-      osc.frequency.value = kind === 'door' ? 180 : kind === 'bell' ? 880 : 72
+      osc.type = kind === 'motor' ? 'sawtooth' : kind === 'horn' ? 'square' : 'sine'
+      osc.frequency.value = kind === 'door' ? 180 : kind === 'bell' ? 880 : kind === 'horn' ? 520 : 72
       gain.gain.setValueAtTime(0.0001, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(kind === 'motor' ? 0.025 : 0.07, ctx.currentTime + 0.03)
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (kind === 'motor' ? 0.22 : 0.42))
+      gain.gain.exponentialRampToValueAtTime(kind === 'motor' ? 0.025 : kind === 'horn' ? 0.09 : 0.07, ctx.currentTime + 0.03)
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (kind === 'motor' ? 0.22 : kind === 'horn' ? 0.6 : 0.42))
       osc.connect(gain).connect(ctx.destination)
       osc.start()
-      osc.stop(ctx.currentTime + 0.45)
+      osc.stop(ctx.currentTime + 0.65)
     }
     const s = stateRef.current
     if (s.doorsOpen !== previousDoor.current) {
@@ -92,7 +93,8 @@ export function Game() {
     }
     if (s.v > 0.7 && previousSpeed.current <= 0.7) sound('motor')
     previousSpeed.current = s.v
-  }, [started, view.time])
+    if (hornPulse > 0) sound('horn')
+  }, [started, view.time, hornPulse])
 
   useEffect(() => {
     if (!started) return
@@ -125,6 +127,7 @@ export function Game() {
       else if (k === ' ') act(() => setNotch(s, -8))
       else if (k === 'o') act(() => openDoors(s))
       else if (k === 'c') act(() => closeDoors(s))
+      else if (k === 'h') setHornPulse((p) => p + 1)
       else if (k === 'v')
         setCamMode((m) => CAMERA_MODES[(CAMERA_MODES.findIndex((c) => c.id === m) + 1) % CAMERA_MODES.length].id)
       else return
@@ -280,6 +283,10 @@ export function Game() {
                 <Button variant="outline" onClick={() => act(closeDoors)} disabled={!started}>
                   <DoorClosed aria-hidden="true" />
                   關門 (C)
+                </Button>
+                <Button variant="outline" onClick={() => setHornPulse((p) => p + 1)} disabled={!started}>
+                  <Volume2 aria-hidden="true" />
+                  鳴笛 (H)
                 </Button>
               </div>
             </div>
