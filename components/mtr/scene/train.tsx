@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three-stdlib'
 import { STATIONS } from '@/lib/mtr/engine'
+import { getRollingStock, type RollingStock } from '@/lib/mtr/rolling-stock'
 import { BODY_H, BODY_W, BODY_Y, CARS, CAR_GAP, CAR_LEN, DOOR_OFFSETS, TRAIN_LEN } from '@/lib/mtr/layout'
 import { brushedSteelTexture, carInteriorTexture, destinationTexture, trainDoorTexture } from '@/lib/mtr/textures'
 import { StaticInstances, type StateRef, type Xform } from './instancing'
@@ -27,11 +28,13 @@ function carStart(i: number) {
 export function Train({
   stateRef,
   doorRef,
+  rollingStockId,
   family,
   visible,
 }: {
   stateRef: StateRef
   doorRef: RefObject<number>
+  rollingStockId: RollingStock['id']
   family: string | null
   visible: boolean
 }) {
@@ -44,8 +47,9 @@ export function Train({
   const m = useMemo(() => {
     const body = new THREE.MeshStandardMaterial({ map: brushedSteelTexture([3, 1]), color: '#e4e7ea', metalness: 0.78, roughness: 0.34 })
     const glass = new THREE.MeshStandardMaterial({ color: '#0a0e12', metalness: 0.7, roughness: 0.08 })
-    const red = new THREE.MeshStandardMaterial({ color: '#c8102e', roughness: 0.42, metalness: 0.2 })
-    const blue = new THREE.MeshStandardMaterial({ color: '#0a5fb4', roughness: 0.42, metalness: 0.2 })
+    const stock = getRollingStock(rollingStockId)
+    const red = new THREE.MeshStandardMaterial({ color: stock.accent, roughness: 0.42, metalness: 0.2 })
+    const blue = new THREE.MeshStandardMaterial({ color: stock.id === 'mtrain' ? '#d7e5ef' : '#0a5fb4', roughness: 0.42, metalness: 0.2 })
     const door = new THREE.MeshStandardMaterial({ map: trainDoorTexture(), metalness: 0.7, roughness: 0.35, side: THREE.DoubleSide })
     const interior = new THREE.MeshStandardMaterial({ map: carInteriorTexture(), emissiveMap: carInteriorTexture(), emissive: '#ffffff', emissiveIntensity: 0.9 })
     const dark = new THREE.MeshStandardMaterial({ color: '#17181a', roughness: 0.75, metalness: 0.3 })
@@ -56,7 +60,7 @@ export function Train({
     const tail = new THREE.MeshStandardMaterial({ color: '#300', emissive: '#ff1a0e', emissiveIntensity: 5, toneMapped: false })
     const mask = new THREE.MeshStandardMaterial({ color: '#141619', metalness: 0.4, roughness: 0.3 })
     return { body, glass, red, blue, door, interior, dark, grey, wheel, rubber, head, tail, mask }
-  }, [])
+  }, [rollingStockId])
 
   const destMat = useMemo(() => {
     if (!family) return null

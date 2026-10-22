@@ -7,6 +7,7 @@ import { Bloom, EffectComposer, ToneMapping, Vignette } from '@react-three/postp
 import { ToneMappingMode } from 'postprocessing'
 import * as THREE from 'three'
 import { STATIONS } from '@/lib/mtr/engine'
+import { type RollingStock } from '@/lib/mtr/rolling-stock'
 import { STATION_BOXES } from '@/lib/mtr/layout'
 import { CabInterior } from './cab-interior'
 import { CameraRig, type CameraMode } from './camera-rig'
@@ -63,7 +64,7 @@ function DoorAnimator({ stateRef, doorRef }: { stateRef: StateRef; doorRef: RefO
   return null
 }
 
-export const RailScene = memo(function RailScene({ stateRef, mode }: { stateRef: StateRef; mode: CameraMode }) {
+export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockId }: { stateRef: StateRef; mode: CameraMode; rollingStockId: RollingStock['id'] }) {
   const doorRef = useRef(0)
   const family = useCjkFontFamily()
 
@@ -98,8 +99,8 @@ export const RailScene = memo(function RailScene({ stateRef, mode }: { stateRef:
           <Station key={b.index} index={b.index} family={family} stateRef={stateRef} doorRef={doorRef} />
         ))}
       </Suspense>
-      <Train stateRef={stateRef} doorRef={doorRef} family={family} visible={mode !== 'cab'} />
-      <CabInterior stateRef={stateRef} visible={mode === 'cab'} />
+      <Train stateRef={stateRef} doorRef={doorRef} rollingStockId={rollingStockId} family={family} visible={mode !== 'cab'} />
+      <CabInterior stateRef={stateRef} visible={mode === 'cab'} rollingStockId={rollingStockId} />
 
       <EffectComposer multisampling={4}>
         <Bloom mipmapBlur luminanceThreshold={1} luminanceSmoothing={0.2} intensity={0.75} radius={0.7} />
