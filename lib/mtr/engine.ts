@@ -39,6 +39,15 @@ export function notchLabel(n: number) {
 }
 
 export type Phase = 'ready' | 'running' | 'atStation' | 'boarding' | 'finished'
+export type Weather = 'clear' | 'rain'
+export type OperatingEvent = 'signal' | 'doors' | 'passengers'
+
+export type ActiveEvent = {
+  kind: OperatingEvent
+  label: string
+  until: number
+  resolved: boolean
+}
 
 export type StationResult = {
   station: string
@@ -69,6 +78,10 @@ export type GameState = {
   results: StationResult[]
   toasts: Toast[]
   toastId: number
+  weather: Weather
+  dayPhase: number
+  activeEvent: ActiveEvent | null
+  eventCount: number
 }
 
 export function createState(): GameState {
@@ -88,6 +101,10 @@ export function createState(): GameState {
     results: [],
     toasts: [],
     toastId: 0,
+    weather: 'clear',
+    dayPhase: 0.28,
+    activeEvent: null,
+    eventCount: 0,
   }
 }
 
@@ -124,7 +141,8 @@ function acceleration(s: GameState) {
     a = base * (v < 11 ? 1 : Math.pow(11 / v, 0.8))
   }
   const resistance = v > 0 ? 0.006 + 0.00012 * v * v : 0
-  return a - resistance
+  const wetBrakeFactor = s.weather === 'rain' && notch < 0 ? 0.72 : 1
+  return a * wetBrakeFactor - resistance
 }
 
 export function setNotch(s: GameState, n: number) {
@@ -201,7 +219,26 @@ export function closeDoors(s: GameState) {
 export function step(s: GameState, dt: number) {
   if (s.phase === 'finished') return
   s.time += dt
-
+  s.dayPhase = (s.dayPhase + dt / 180) % 1
+  if (s.weather === 'clear' && Math.floor(s.time / 45) % 3 === 2) {
+    s.weather = 'rain'
+    pushToast(s, '天氣轉為雨天：濕滑路軌，制動距離增加', 'warn', 5)
+  } else if (s.weather === 'rain' && Math.floor(s.time / 45) % 3 === 0) {
+    s.weather = 'clear'
+    pushToast(s, '雨勢減弱，路軌恢復乾燥', 'good', 4)
+  }
+  if (!s.activeEvent && s.phase === 'running' && s.v > 2 && Math.floor(s.time / 28) > s.eventCount) {
+    s.eventCount += 1
+    const roll = s.eventCount % 3
+    s.activeEvent = roll === 1
+      ? { kind: 'signal', label: '前方訊號故障：臨時紅燈，請減速停車', until: s.time + 9, resolved: false }
+      : roll === 2
+        ? { kind: 'doors', label: '月台幕門故障：到站後需要額外等候', until: s.time + 12, resolved: false }
+        : { kind: 'passengers', label: '乘客阻礙車門：請重新廣播並再次關門', until: s.time + 15, resolved: false }
+    pushToast(s, s.activeEvent.label, 'warn', 6)
+  }
+  if (s.activeEvent?.kind === 'signal' && s.time >= s.activeEvent.until && s.v < 1) s.activeEvent.resolved = true
+  if (s.activeEvent?.kind === 'doors' && s.phase === 'boarding' && s.dwell <= 0) s.dwell = 4
   if (s.phase === 'boarding') s.dwell = Math.max(0, s.dwell - dt)
 
   const a = acceleration(s)

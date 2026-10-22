@@ -36,7 +36,7 @@ const RailScene = dynamic(() => import('./scene/rail-scene').then((m) => m.RailS
 
 type Snapshot = Pick<
   GameState,
-  'pos' | 'v' | 'notch' | 'doorsOpen' | 'phase' | 'target' | 'dwell' | 'time' | 'segmentStart' | 'atpTripped' | 'toasts' | 'results'
+  'pos' | 'v' | 'notch' | 'doorsOpen' | 'phase' | 'target' | 'dwell' | 'time' | 'segmentStart' | 'atpTripped' | 'toasts' | 'results' | 'weather' | 'dayPhase' | 'activeEvent'
 >
 
 function snap(s: GameState): Snapshot {
@@ -53,6 +53,9 @@ function snap(s: GameState): Snapshot {
     atpTripped: s.atpTripped,
     toasts: s.toasts,
     results: s.results,
+    weather: s.weather,
+    dayPhase: s.dayPhase,
+    activeEvent: s.activeEvent,
   }
 }
 
@@ -217,6 +220,10 @@ export function Game() {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1.5" aria-live="polite">
+                <div className="flex gap-2 text-xs font-bold">
+                  <span className={cn('rounded-md px-2 py-1 backdrop-blur', view.weather === 'rain' ? 'bg-sky-900/80 text-sky-100' : 'bg-emerald-900/75 text-emerald-100')}>{view.weather === 'rain' ? '雨天 · 濕滑路軌' : '晴天'}</span>
+                  <span className="rounded-md bg-background/80 px-2 py-1 backdrop-blur">{view.activeEvent ? `事件：${view.activeEvent.label}` : '營運正常'}</span>
+                </div>
                 {activeToasts.map((t) => (
                   <div
                     key={t.id}

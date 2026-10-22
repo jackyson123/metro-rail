@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, memo, useEffect, useRef, useState, type RefObject } from 'react'
+import { Suspense, memo, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment, Lightformer } from '@react-three/drei'
 import { Bloom, EffectComposer, ToneMapping, Vignette } from '@react-three/postprocessing'
@@ -34,6 +34,22 @@ function useCjkFontFamily() {
   return family
 }
 
+function WeatherEffects({ stateRef }: { stateRef: StateRef }) {
+  const rain = useRef<THREE.Points>(null)
+  useFrame((_, dt) => {
+    const s = stateRef.current
+    if (!rain.current || !s) return
+    rain.current.visible = s.weather === 'rain'
+    rain.current.rotation.z += dt * 0.08
+  })
+  const positions = useMemo(() => {
+    const a = new Float32Array(420 * 3)
+    for (let i = 0; i < 420; i += 1) { a[i * 3] = (i % 28) - 14; a[i * 3 + 1] = (i % 15) * 0.35; a[i * 3 + 2] = -((i * 7) % 24) }
+    return a
+  }, [])
+  return <points ref={rain} position={[0, 0, -10]}><bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry><pointsMaterial color="#a8c9e8" size={0.045} transparent opacity={0.55} /></points>
+}
+
 function DoorAnimator({ stateRef, doorRef }: { stateRef: StateRef; doorRef: RefObject<number> }) {
   useFrame((_, dt) => {
     const s = stateRef.current
@@ -65,6 +81,7 @@ export const RailScene = memo(function RailScene({ stateRef, mode }: { stateRef:
       <DoorAnimator stateRef={stateRef} doorRef={doorRef} />
       <CameraRig stateRef={stateRef} mode={mode} />
       <Lights stateRef={stateRef} />
+      <WeatherEffects stateRef={stateRef} />
 
       <Environment resolution={128} frames={1}>
         <Lightformer form="rect" intensity={2.4} color="#fff8ee" position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[14, 2, 1]} />
