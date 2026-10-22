@@ -9,12 +9,17 @@ import type { StateRef } from './instancing'
 
 const TUNNEL_POOL = 5
 const STATION_POOL = 8
+const OUTDOOR_SKY = new THREE.Color('#8faec2')
+const INDOOR_SKY = new THREE.Color('#020203')
+const OUTDOOR_FOG = new THREE.Color('#7894a4')
+const INDOOR_FOG = new THREE.Color('#030304')
 
 export function Lights({ stateRef }: { stateRef: StateRef }) {
   const scene = useThree((s) => s.scene)
   const hemi = useRef<THREE.HemisphereLight>(null)
   const spotL = useRef<THREE.SpotLight>(null)
   const spotR = useRef<THREE.SpotLight>(null)
+  const sun = useRef<THREE.DirectionalLight>(null)
   const tunnel = useRef<(THREE.PointLight | null)[]>([])
   const station = useRef<(THREE.PointLight | null)[]>([])
   const targets = useMemo(() => [new THREE.Object3D(), new THREE.Object3D()], [])
@@ -30,8 +35,22 @@ export function Lights({ stateRef }: { stateRef: StateRef }) {
     const z = -s.pos
     const prox = stationProximity(s.pos)
 
-    if (hemi.current) hemi.current.intensity = 0.05 + 1.25 * prox.factor
-    scene.environmentIntensity = 0.12 + 0.5 * prox.factor
+    const nearStation = prox.distance < 260
+    const tunnelStretch = Math.floor(Math.max(0, s.pos) / 250) % 3 === 1
+    const outdoor = !tunnelStretch && !nearStation
+    const weatherDim = s.weather === 'rain' ? 0.78 : 1
+
+    if (hemi.current) hemi.current.intensity = (outdoor ? 0.72 : 0.22 + 0.5 * prox.factor) * weatherDim
+    scene.environmentIntensity = (outdoor ? 0.85 : 0.2 + 0.42 * prox.factor) * weatherDim
+    scene.background = outdoor ? OUTDOOR_SKY : INDOOR_SKY
+    if (scene.fog) scene.fog.color.copy(outdoor ? OUTDOOR_FOG : INDOOR_FOG)
+    if (sun.current) {
+      sun.current.visible = outdoor
+      sun.current.intensity = (s.weather === 'rain' ? 1.15 : 2.1)
+      sun.current.position.set(-18, 28, z + 28)
+      sun.current.target.position.set(0, 0, z - 55)
+      sun.current.target.updateMatrixWorld()
+    }
 
     const spots = [spotL.current, spotR.current]
     spots.forEach((sp, i) => {
@@ -65,7 +84,8 @@ export function Lights({ stateRef }: { stateRef: StateRef }) {
 
   return (
     <>
-      <hemisphereLight ref={hemi} args={['#e8edf2', '#3b352c', 0.06]} />
+      <hemisphereLight ref={hemi} args={['#e8edf2', '#3b352c', 0.32]} />
+      <directionalLight ref={sun} color="#fff4d6" intensity={2.1} position={[-18, 28, 28]} castShadow={false} />
       <spotLight ref={spotL} color="#fff3dc" intensity={260} distance={170} angle={0.36} penumbra={0.8} decay={1.3} />
       <spotLight ref={spotR} color="#fff3dc" intensity={260} distance={170} angle={0.36} penumbra={0.8} decay={1.3} />
       {targets.map((t, i) => (
