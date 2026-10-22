@@ -26,6 +26,7 @@ import { NotchLever } from './notch-lever'
 import { ResultScreen } from './result-screen'
 import { Speedometer } from './speedometer'
 import { cn } from '@/lib/utils'
+import { ROLLING_STOCK, type RollingStock } from '@/lib/mtr/rolling-stock'
 
 const RailScene = dynamic(() => import('./scene/rail-scene').then((m) => m.RailScene), {
   ssr: false,
@@ -36,7 +37,7 @@ const RailScene = dynamic(() => import('./scene/rail-scene').then((m) => m.RailS
 
 type Snapshot = Pick<
   GameState,
-  'pos' | 'v' | 'notch' | 'doorsOpen' | 'phase' | 'target' | 'dwell' | 'time' | 'segmentStart' | 'atpTripped' | 'toasts' | 'results'
+  'pos' | 'v' | 'notch' | 'doorsOpen' | 'phase' | 'target' | 'dwell' | 'time' | 'segmentStart' | 'atpTripped' | 'toasts' | 'results' | 'weather' | 'dayPhase' | 'activeEvent'
 >
 
 function snap(s: GameState): Snapshot {
@@ -53,6 +54,9 @@ function snap(s: GameState): Snapshot {
     atpTripped: s.atpTripped,
     toasts: s.toasts,
     results: s.results,
+    weather: s.weather,
+    dayPhase: s.dayPhase,
+    activeEvent: s.activeEvent,
   }
 }
 
@@ -61,6 +65,7 @@ export function Game() {
   const [started, setStarted] = useState(false)
   const [view, setView] = useState<Snapshot>(() => snap(stateRef.current))
   const [camMode, setCamMode] = useState<CameraMode>('cab')
+  const [rollingStockId, setRollingStockId] = useState<RollingStock['id']>('urban')
   const audioRef = useRef<AudioContext | null>(null)
   const previousDoor = useRef(false)
   const previousSpeed = useRef(0)
@@ -68,6 +73,7 @@ export function Game() {
 
   useEffect(() => {
     if (!started) return
+    const stock = ROLLING_STOCK.find((item) => item.id === rollingStockId) ?? ROLLING_STOCK[0]
     const sound = (kind: 'door' | 'motor' | 'bell' | 'horn') => {
       const AudioCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
       if (!AudioCtor) return
@@ -77,7 +83,7 @@ export function Game() {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       osc.type = kind === 'motor' ? 'sawtooth' : kind === 'horn' ? 'square' : 'sine'
-      osc.frequency.value = kind === 'door' ? 180 : kind === 'bell' ? 880 : kind === 'horn' ? 520 : 72
+      osc.frequency.value = kind === 'door' ? 180 : kind === 'bell' ? 880 : kind === 'horn' ? 520 : stock.motorHz
       gain.gain.setValueAtTime(0.0001, ctx.currentTime)
       gain.gain.exponentialRampToValueAtTime(kind === 'motor' ? 0.025 : kind === 'horn' ? 0.09 : 0.07, ctx.currentTime + 0.03)
       gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (kind === 'motor' ? 0.22 : kind === 'horn' ? 0.6 : 0.42))
@@ -99,7 +105,7 @@ export function Game() {
     if (s.v > 0.7 && previousSpeed.current <= 0.7) sound('motor')
     previousSpeed.current = s.v
     if (hornPulse > 0) sound('horn')
-  }, [started, view.time, hornPulse])
+  }, [started, view.time, hornPulse, rollingStockId])
 
   useEffect(() => {
     if (!started) return
@@ -169,7 +175,18 @@ export function Game() {
             <span className="text-xs text-muted-foreground">MTR Driver Simulator · Island Line</span>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <label className="flex items-center gap-2 rounded-md border border-border bg-cab px-2.5 py-1.5 text-xs">
+            <span className="text-muted-foreground">列車型號</span>
+            <select
+              value={rollingStockId}
+              onChange={(event) => setRollingStockId(event.target.value as RollingStock['id'])}
+              className="bg-transparent font-bold outline-none"
+              aria-label="選擇列車型號"
+            >
+              {ROLLING_STOCK.map((stock) => <option key={stock.id} value={stock.id}>{stock.name}</option>)}
+            </select>
+          </label>
           <div className="flex flex-col items-end">
             <span className="text-xs text-muted-foreground">總分</span>
             <span className="font-mono text-xl font-bold tabular-nums text-accent">{score}</span>
@@ -184,7 +201,7 @@ export function Game() {
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <div className="flex min-w-0 flex-col gap-4">
           <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl border-8 border-cab bg-background shadow-2xl md:aspect-[16/8]">
-            <RailScene stateRef={stateRef} mode={camMode} />
+            <RailScene stateRef={stateRef} mode={camMode} rollingStockId={rollingStockId} />
 
             <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between gap-2 p-3">
               <div className="flex flex-col items-start gap-2">
@@ -217,6 +234,10 @@ export function Game() {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1.5" aria-live="polite">
+                <div className="flex gap-2 text-xs font-bold">
+                  <span className={cn('rounded-md px-2 py-1 backdrop-blur', view.weather === 'rain' ? 'bg-sky-900/80 text-sky-100' : 'bg-emerald-900/75 text-emerald-100')}>{view.weather === 'rain' ? '雨天 · 濕滑路軌' : '晴天'}</span>
+                  <span className="rounded-md bg-background/80 px-2 py-1 backdrop-blur">{view.activeEvent ? `事件：${view.activeEvent.label}` : '營運正常'}</span>
+                </div>
                 {activeToasts.map((t) => (
                   <div
                     key={t.id}
@@ -251,7 +272,9 @@ export function Game() {
 
           <LineMap pos={view.pos} target={view.target} />
 
-          <section aria-label="駕駛台" className="grid gap-4 rounded-xl border border-border bg-cab p-4 sm:grid-cols-[auto_1fr_auto]">
+          <section aria-label="駕駛台" className="relative grid gap-4 overflow-hidden rounded-xl border border-cab-edge bg-cab p-4 shadow-[0_14px_40px_rgba(15,23,42,0.16)] sm:grid-cols-[auto_1fr_auto]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-line via-accent to-line" />
+            <div className="pointer-events-none absolute -right-20 -top-24 size-56 rounded-full bg-accent/10 blur-3xl" />
             <div className="flex justify-center">
               <Speedometer speed={speed} limit={limit} />
             </div>
@@ -334,7 +357,7 @@ function IntroOverlay({ onStart }: { onStart: () => void }) {
             開始駕駛
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">提示：用 ↑ ↓ 鍵操控主控制器，O 開門、C 關門。右邊有詳細駕駛須知。</p>
+        <p className="text-xs text-muted-foreground">提示：用 ↑ ↓ 操控主控制器，O 開門、C 關門。右邊有詳細駕駛須知。</p>
       </div>
     </div>
   )

@@ -1,7 +1,9 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { STATIONS } from '@/lib/mtr/engine'
 import { SEG, TUNNEL_CY, TUNNEL_R, inStation } from '@/lib/mtr/layout'
 import { concreteTexture, exitSignTexture } from '@/lib/mtr/textures'
 import { Repeater, type StateRef } from './instancing'
@@ -78,6 +80,18 @@ export function Tunnel({ stateRef, family }: { stateRef: StateRef; family: strin
     }
   }, [])
 
+  const tunnelRef = useRef<THREE.Group>(null)
+
+  useFrame(() => {
+    const s = stateRef.current
+    const group = tunnelRef.current
+    if (!s || !group) return
+    const nearStation = STATIONS.some((station) => Math.abs(s.pos - station.pos) < 52)
+    const tunnelStretch = Math.floor(Math.max(0, s.pos) / 250) % 3 === 1
+    group.visible = tunnelStretch || nearStation
+    group.position.z = -s.pos
+  })
+
   const signMat = useMemo(() => {
     if (!family) return null
     const tex = exitSignTexture(family)
@@ -93,7 +107,7 @@ export function Tunnel({ stateRef, family }: { stateRef: StateRef; family: strin
   ]
 
   return (
-    <group>
+    <group ref={tunnelRef}>
       <Repeater
         stateRef={stateRef}
         spacing={SEG}

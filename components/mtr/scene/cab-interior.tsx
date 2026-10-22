@@ -4,13 +4,15 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { BODY_Y } from '@/lib/mtr/layout'
+import { getRollingStock, type RollingStock } from '@/lib/mtr/rolling-stock'
 import type { StateRef } from './instancing'
 
 const boxGeo = new THREE.BoxGeometry(1, 1, 1)
 const planeGeo = new THREE.PlaneGeometry(1, 1)
 const DASH_TOP = BODY_Y + 1.02
 
-export function CabInterior({ stateRef, visible }: { stateRef: StateRef; visible: boolean }) {
+export function CabInterior({ stateRef, visible, rollingStockId }: { stateRef: StateRef; visible: boolean; rollingStockId: RollingStock['id'] }) {
+  const stock = getRollingStock(rollingStockId)
   const group = useRef<THREE.Group>(null)
   const lever = useRef<THREE.Group>(null)
   const atpLamp = useRef<THREE.MeshStandardMaterial>(null)
@@ -21,7 +23,7 @@ export function CabInterior({ stateRef, visible }: { stateRef: StateRef; visible
       shell: new THREE.MeshStandardMaterial({ color: '#141619', roughness: 0.85, metalness: 0.05, side: THREE.DoubleSide }),
       dash: new THREE.MeshStandardMaterial({ color: '#1b1d20', roughness: 0.65, metalness: 0.15 }),
       panel: new THREE.MeshStandardMaterial({ color: '#25282c', roughness: 0.5, metalness: 0.3 }),
-      trim: new THREE.MeshStandardMaterial({ color: '#4a4f55', roughness: 0.45, metalness: 0.6 }),
+      trim: new THREE.MeshStandardMaterial({ color: stock.accent, roughness: 0.45, metalness: 0.6 }),
       screen: new THREE.MeshStandardMaterial({ color: '#050b10', emissive: '#0f3b57', emissiveIntensity: 0.9, roughness: 0.2 }),
       knob: new THREE.MeshStandardMaterial({ color: '#0c0c0c', roughness: 0.35 }),
       windshield: new THREE.MeshStandardMaterial({
@@ -34,7 +36,7 @@ export function CabInterior({ stateRef, visible }: { stateRef: StateRef; visible
       }),
       green: new THREE.MeshStandardMaterial({ color: '#031', emissive: '#30ff80', emissiveIntensity: 2.2, toneMapped: false }),
     }),
-    [],
+    [stock.accent],
   )
 
   useFrame(() => {
