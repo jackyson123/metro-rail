@@ -295,6 +295,7 @@ export function Station({
       <StaticInstances geometry={geo.body} material={m.people} items={items.bodies} />
       <StaticInstances geometry={geo.head} material={m.people} items={items.heads} />
       <BoardingPassengers stateRef={stateRef} />
+      <PlatformWalkers stateRef={stateRef} positions={items.bodies.slice(0, 8).map((b) => b.p)} />
 
       {text && (
         <group position={[PSD_X + 0.32, 2.55, -0.6]}>
@@ -316,6 +317,33 @@ export function Station({
           <meshStandardMaterial ref={greenLamp} color="#020" emissive="#2dff7a" emissiveIntensity={0.05} toneMapped={false} />
         </mesh>
       </group>
+    </group>
+  )
+}
+
+function PlatformWalkers({ stateRef, positions }: { stateRef: StateRef; positions: [number, number, number][] }) {
+  const group = useRef<THREE.Group>(null)
+  useFrame((_, dt) => {
+    const s = stateRef.current
+    if (!group.current || !s) return
+    group.current.children.forEach((person, i) => {
+      const base = positions[i]
+      const walking = i % 3 === 0 || i === 5
+      person.position.z = base[2] + (walking ? Math.sin(s.time * 1.6 + i) * 1.8 : Math.sin(s.time * 0.8 + i) * 0.04)
+      person.position.x = base[0] + (walking ? Math.sin(s.time * 1.1 + i) * 0.22 : 0)
+      person.rotation.y = walking ? Math.sin(s.time * 1.1 + i) * 0.18 : 0
+      person.position.y = base[1]
+      person.visible = !s.doorsOpen || s.phase !== 'boarding'
+    })
+  })
+  return (
+    <group ref={group}>
+      {positions.map((p, i) => (
+        <group key={i} position={p}>
+          <mesh scale={[0.22, 0.95, 0.22]}><capsuleGeometry args={[0.18, 0.7, 4, 8]} /><meshStandardMaterial color={CLOTHES[(i + 3) % CLOTHES.length]} roughness={0.82} /></mesh>
+          <mesh position={[0, 0.62, 0]}><sphereGeometry args={[0.13, 12, 8]} /><meshStandardMaterial color={SKIN[(i + 1) % SKIN.length]} roughness={0.8} /></mesh>
+        </group>
+      ))}
     </group>
   )
 }

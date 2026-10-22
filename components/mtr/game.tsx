@@ -88,7 +88,12 @@ export function Game() {
     const s = stateRef.current
     if (s.doorsOpen !== previousDoor.current) {
       sound('door')
-      sound('bell')
+      if (s.doorsOpen) sound('bell')
+      else {
+        sound('bell')
+        window.setTimeout(() => sound('bell'), 260)
+        window.setTimeout(() => sound('bell'), 520)
+      }
       previousDoor.current = s.doorsOpen
     }
     if (s.v > 0.7 && previousSpeed.current <= 0.7) sound('motor')

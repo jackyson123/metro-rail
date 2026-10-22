@@ -20,7 +20,7 @@ export function CameraRig({ stateRef, mode }: { stateRef: StateRef; mode: Camera
     const s = stateRef.current
     if (!s) return
     const z = -s.pos
-    const bend = Math.sin(s.pos * 0.00165) * 0.32
+    const bend = Math.sin(s.pos * 0.00165) * 0.72 + Math.sin(s.pos * 0.0041) * 0.18
     const shake = Math.min(s.v, 25) / 25
     const t = s.time
     const jx = Math.sin(t * 1.7) * 0.012 * shake + Math.sin(t * 7.3) * 0.003 * shake
