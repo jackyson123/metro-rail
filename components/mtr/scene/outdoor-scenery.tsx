@@ -44,14 +44,16 @@ export function OutdoorScenery({ stateRef }: { stateRef: StateRef }) {
     const outdoor = !tunnelStretch && !nearStation
     const group = groupRef.current
     if (!group) return
-    group.visible = outdoor
+    // Keep the sky, road and distant city loaded at all times. Hiding this group
+    // caused a black void while the train crossed between scenery segments.
+    group.visible = true
     group.position.z = -s.pos
     group.rotation.y = Math.sin(s.pos * 0.0017) * 0.035
   })
 
   return (
     <group ref={groupRef}>
-      <mesh position={[0, 30, -220]} scale={[180, 70, 500]}>
+      <mesh position={[0, 30, -520]} scale={[220, 80, 1100]}>
         <sphereGeometry args={[1, 24, 12]} />
         <primitive object={skyMat} attach="material" />
       </mesh>
