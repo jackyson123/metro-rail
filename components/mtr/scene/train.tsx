@@ -190,9 +190,9 @@ export function Train({
         <Pantograph key={i} z={carStart(i) + 5} m={m} />
       ))}
 
-      <group position={[0, 0, -0.004]} rotation={[0, Math.PI, 0]}>
-        <mesh geometry={planeGeo} material={m.mask} position={[0, BODY_Y + 2.05, 0]} scale={[2.9, 1.55, 1]} />
-        <mesh geometry={planeGeo} material={m.glass} position={[0, BODY_Y + 2.1, 0.002]} scale={[2.55, 1.1, 1]} />
+      <group position={[0, 0, -0.035]} rotation={[0, Math.PI, 0]}>
+        <mesh geometry={planeGeo} material={m.mask} position={[0, BODY_Y + 2.05, 0]} scale={[2.92, 1.58, 1]} />
+        <mesh geometry={planeGeo} material={m.glass} position={[0, BODY_Y + 2.1, 0.012]} scale={[2.55, 1.1, 1]} />
         {destMat && <mesh geometry={planeGeo} material={destMat} position={[0, BODY_Y + 2.95, 0.003]} scale={[1.5, 0.28, 1]} />}
         <mesh geometry={planeGeo} material={m.red} position={[0, BODY_Y + 1.3, 0.002]} scale={[2.95, 0.2, 1]} />
         {[-1, 1].map((x) => (
