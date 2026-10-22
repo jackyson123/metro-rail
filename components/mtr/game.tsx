@@ -272,7 +272,9 @@ export function Game() {
 
           <LineMap pos={view.pos} target={view.target} />
 
-          <section aria-label="駕駛台" className="grid gap-4 rounded-xl border border-border bg-cab p-4 sm:grid-cols-[auto_1fr_auto]">
+          <section aria-label="駕駛台" className="relative grid gap-4 overflow-hidden rounded-xl border border-cab-edge bg-cab p-4 shadow-[0_14px_40px_rgba(15,23,42,0.16)] sm:grid-cols-[auto_1fr_auto]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-line via-accent to-line" />
+            <div className="pointer-events-none absolute -right-20 -top-24 size-56 rounded-full bg-accent/10 blur-3xl" />
             <div className="flex justify-center">
               <Speedometer speed={speed} limit={limit} />
             </div>

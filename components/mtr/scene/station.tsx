@@ -278,6 +278,12 @@ export function Station({
             <mesh geometry={planeGeo} material={text.name} scale={[8, 2, 1]} />
           </group>
         ))}
+      {text && (
+        <group position={[PLATFORM_FAR_X + 0.12, 2.75, psdMid]} rotation={ROT_FACE_POS_X}>
+          <mesh geometry={boxGeo} material={m.darkMetal} scale={[0.16, 1.15, Math.min(5.2, psdLen * 0.22)]} />
+          <mesh geometry={planeGeo} material={text.name} position={[0.1, 0, 0]} scale={[Math.min(4.8, psdLen * 0.2), 1.55, 1]} />
+        </group>
+      )}
       {items.adSlots.map(({ z, i }) => (
         <group key={`a${z}`} position={[TRACK_WALL_X - 0.06, 2.55, z]} rotation={ROT_FACE_NEG_X}>
           <mesh geometry={boxGeo} material={m.darkMetal} position={[0, 0, -0.04]} scale={[3.9, 2.7, 0.08]} />
