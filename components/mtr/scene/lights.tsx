@@ -12,7 +12,7 @@ const STATION_POOL = 8
 const OUTDOOR_SKY = new THREE.Color('#8faec2')
 const INDOOR_SKY = new THREE.Color('#16212a')
 const OUTDOOR_FOG = new THREE.Color('#8eabb7')
-const INDOOR_FOG = new THREE.Color('#17232b')
+const INDOOR_FOG = new THREE.Color('#25343e')
 
 export function Lights({ stateRef }: { stateRef: StateRef }) {
   const scene = useThree((s) => s.scene)
@@ -40,8 +40,8 @@ export function Lights({ stateRef }: { stateRef: StateRef }) {
     const outdoor = !tunnelStretch && !nearStation
     const weatherDim = s.weather === 'rain' ? 0.78 : 1
 
-    if (hemi.current) hemi.current.intensity = (outdoor ? 0.9 : 0.42 + 0.42 * prox.factor) * weatherDim
-    scene.environmentIntensity = (outdoor ? 1.05 : 0.38 + 0.42 * prox.factor) * weatherDim
+    if (hemi.current) hemi.current.intensity = (outdoor ? 1.15 : 0.72 + 0.5 * prox.factor) * weatherDim
+    scene.environmentIntensity = (outdoor ? 1.25 : 0.72 + 0.5 * prox.factor) * weatherDim
     scene.background = outdoor ? OUTDOOR_SKY : INDOOR_SKY
     if (scene.fog) scene.fog.color.copy(outdoor ? OUTDOOR_FOG : INDOOR_FOG)
     if (sun.current) {

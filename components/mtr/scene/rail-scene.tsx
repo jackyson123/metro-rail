@@ -75,6 +75,7 @@ export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockI
       camera={{ fov: 62, near: 0.05, far: 700, position: [0.28, 2.6, 1.45] }}
       onCreated={({ gl }) => {
         gl.outputColorSpace = THREE.SRGBColorSpace
+        gl.toneMappingExposure = 1.15
       }}
     >
       <color attach="background" args={['#16212a']} />
@@ -105,7 +106,7 @@ export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockI
       <EffectComposer multisampling={4}>
         <Bloom mipmapBlur luminanceThreshold={1} luminanceSmoothing={0.2} intensity={0.75} radius={0.7} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        <Vignette offset={0.32} darkness={0.55} />
+        <Vignette offset={0.42} darkness={0.28} />
       </EffectComposer>
     </Canvas>
   )
