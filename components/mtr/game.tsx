@@ -256,7 +256,7 @@ export function Game() {
               <Speedometer speed={speed} limit={limit} />
             </div>
 
-            <div className="grid grid-cols-2 content-start gap-2 md:grid-cols-3">
+            <div className="grid min-w-0 grid-cols-2 content-start gap-2 md:grid-cols-3">
               <Readout label="距離停車位置" value={`${dist >= 0 ? '' : '+'}${Math.abs(dist) >= 100 ? Math.round(Math.abs(dist)) : Math.abs(dist).toFixed(1)}`} unit="米" warn={dist < -5} />
               <Readout label="限速" value={`${limit}`} unit="km/h" warn={speed > limit + 0.5} />
               <Readout label="前方限速" value={zone ? `${zone.limit}` : '—'} unit={zone ? `${Math.round(zone.start - view.pos)} 米後` : ''} />
