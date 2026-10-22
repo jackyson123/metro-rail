@@ -99,7 +99,7 @@ export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockI
           <Station key={b.index} index={b.index} family={family} stateRef={stateRef} doorRef={doorRef} />
         ))}
       </Suspense>
-      <Train stateRef={stateRef} doorRef={doorRef} rollingStockId={rollingStockId} family={family} visible={mode !== 'cab'} />
+      <Train key={rollingStockId} stateRef={stateRef} doorRef={doorRef} rollingStockId={rollingStockId} family={family} visible={mode !== 'cab'} />
       <CabInterior stateRef={stateRef} visible={mode === 'cab'} rollingStockId={rollingStockId} />
 
       <EffectComposer multisampling={4}>
