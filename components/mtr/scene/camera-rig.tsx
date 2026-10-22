@@ -32,8 +32,10 @@ export function CameraRig({ stateRef, mode }: { stateRef: StateRef; mode: Camera
       camera.lookAt(0.12 + bend * 2, 2.05, z - 80)
     } else if (mode === 'front') {
       fov = 55
-      camera.position.set(1.25 + bend, 3.05, z - 15)
-      camera.lookAt(-0.25 + bend * 2, 2.1, z + 14)
+      // Keep the exterior camera on the track centreline and well ahead of the nose.
+      // The previous offset put the camera inside the rounded side of the train on bends.
+      camera.position.set(bend * 0.2, 3.0, z - 20)
+      camera.lookAt(bend * 0.7, 2.05, z + 20)
     } else {
       fov = 58
       const onPlatform = inStation(s.pos - 15) && inStation(s.pos + 30)
