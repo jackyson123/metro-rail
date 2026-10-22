@@ -10,9 +10,9 @@ import type { StateRef } from './instancing'
 const TUNNEL_POOL = 5
 const STATION_POOL = 8
 const OUTDOOR_SKY = new THREE.Color('#8faec2')
-const INDOOR_SKY = new THREE.Color('#020203')
-const OUTDOOR_FOG = new THREE.Color('#7894a4')
-const INDOOR_FOG = new THREE.Color('#030304')
+const INDOOR_SKY = new THREE.Color('#16212a')
+const OUTDOOR_FOG = new THREE.Color('#8eabb7')
+const INDOOR_FOG = new THREE.Color('#17232b')
 
 export function Lights({ stateRef }: { stateRef: StateRef }) {
   const scene = useThree((s) => s.scene)
@@ -40,8 +40,8 @@ export function Lights({ stateRef }: { stateRef: StateRef }) {
     const outdoor = !tunnelStretch && !nearStation
     const weatherDim = s.weather === 'rain' ? 0.78 : 1
 
-    if (hemi.current) hemi.current.intensity = (outdoor ? 0.72 : 0.22 + 0.5 * prox.factor) * weatherDim
-    scene.environmentIntensity = (outdoor ? 0.85 : 0.2 + 0.42 * prox.factor) * weatherDim
+    if (hemi.current) hemi.current.intensity = (outdoor ? 0.9 : 0.42 + 0.42 * prox.factor) * weatherDim
+    scene.environmentIntensity = (outdoor ? 1.05 : 0.38 + 0.42 * prox.factor) * weatherDim
     scene.background = outdoor ? OUTDOOR_SKY : INDOOR_SKY
     if (scene.fog) scene.fog.color.copy(outdoor ? OUTDOOR_FOG : INDOOR_FOG)
     if (sun.current) {
@@ -84,7 +84,8 @@ export function Lights({ stateRef }: { stateRef: StateRef }) {
 
   return (
     <>
-      <hemisphereLight ref={hemi} args={['#e8edf2', '#3b352c', 0.32]} />
+      <ambientLight color="#b8c9d4" intensity={0.28} />
+      <hemisphereLight ref={hemi} args={['#e8edf2', '#3b352c', 0.52]} />
       <directionalLight ref={sun} color="#fff4d6" intensity={2.1} position={[-18, 28, 28]} castShadow={false} />
       <spotLight ref={spotL} color="#fff3dc" intensity={260} distance={170} angle={0.36} penumbra={0.8} decay={1.3} />
       <spotLight ref={spotR} color="#fff3dc" intensity={260} distance={170} angle={0.36} penumbra={0.8} decay={1.3} />

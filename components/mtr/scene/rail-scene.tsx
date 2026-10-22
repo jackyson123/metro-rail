@@ -77,8 +77,8 @@ export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockI
         gl.outputColorSpace = THREE.SRGBColorSpace
       }}
     >
-      <color attach="background" args={['#020203']} />
-      <fog attach="fog" args={['#030304', 45, 430]} />
+      <color attach="background" args={['#16212a']} />
+      <fog attach="fog" args={['#17232b', 55, 520]} />
       <DoorAnimator stateRef={stateRef} doorRef={doorRef} />
       <CameraRig stateRef={stateRef} mode={mode} />
       <Lights stateRef={stateRef} />
