@@ -357,7 +357,7 @@ function IntroOverlay({ onStart }: { onStart: () => void }) {
             開始駕駛
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">提示：用 ↑ ↓ ��操控主控制器，O 開門、C 關門。右邊有詳細駕駛須知。</p>
+        <p className="text-xs text-muted-foreground">提示：用 ↑ ↓ 操控主控制器，O 開門、C 關門。右邊有詳細駕駛須知。</p>
       </div>
     </div>
   )
