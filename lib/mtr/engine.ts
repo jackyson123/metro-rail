@@ -10,7 +10,6 @@ export type SpeedZone = { start: number; end: number; limit: number }
 export const STATIONS: Station[] = [
   { zh: '堅尼地城', en: 'Kennedy Town', pos: 0, tile: [64, 140, 136] },
   { zh: '香港大學', en: 'HKU', pos: 950, tile: [178, 74, 60] },
-  { zh: '西營盤', en: 'Sai Ying Pun', pos: 1820, tile: [196, 152, 52] },
   { zh: '上環', en: 'Sheung Wan', pos: 2780, tile: [92, 110, 160] },
   { zh: '中環', en: 'Central', pos: 3700, tile: [52, 128, 80] },
   { zh: '金鐘', en: 'Admiralty', pos: 4560, tile: [44, 96, 170] },
