@@ -82,8 +82,9 @@ export function CabInterior({ stateRef, visible, rollingStockId }: { stateRef: S
       <mesh geometry={boxGeo} material={m.shell} position={[1.42, 2.95, 0.25]} rotation={[0, 0, -0.06]} scale={[0.2, 1.8, 0.14]} />
       <mesh geometry={boxGeo} material={m.shell} position={[0, 3.92, 0.45]} scale={[3.1, 0.42, 0.6]} />
       <mesh geometry={boxGeo} material={m.trim} position={[0, DASH_TOP + 0.02, 0.3]} scale={[2.95, 0.06, 0.12]} />
-      <mesh geometry={planeGeo} material={m.shell} position={[-1.52, 2.6, 1.3]} rotation={[0, Math.PI / 2, 0]} scale={[2.2, 2.8, 1]} />
-      <mesh geometry={planeGeo} material={m.shell} position={[1.52, 2.6, 1.3]} rotation={[0, -Math.PI / 2, 0]} scale={[2.2, 2.8, 1]} />
+      {/* Keep the side trim behind the camera frustum; full side planes otherwise become black occluders in the cab view. */}
+      <mesh geometry={planeGeo} material={m.shell} position={[-1.72, 2.6, 0.05]} rotation={[0, Math.PI / 2, 0]} scale={[0.7, 2.8, 1]} />
+      <mesh geometry={planeGeo} material={m.shell} position={[1.72, 2.6, 0.05]} rotation={[0, -Math.PI / 2, 0]} scale={[0.7, 2.8, 1]} />
       <mesh geometry={planeGeo} material={m.shell} position={[0, 4.05, 1.3]} rotation={[Math.PI / 2, 0, 0]} scale={[3.1, 2.2, 1]} />
       <mesh geometry={planeGeo} material={m.windshield} position={[0, 2.95, 0.22]} scale={[2.7, 1.75, 1]} />
       <mesh geometry={boxGeo} material={m.knob} position={[-0.75, 2.1, 0.2]} rotation={[0, 0, 0.1]} scale={[1.0, 0.018, 0.015]} />

@@ -86,7 +86,7 @@ export function Tunnel({ stateRef, family }: { stateRef: StateRef; family: strin
     const s = stateRef.current
     const group = tunnelRef.current
     if (!s || !group) return
-    const nearStation = STATIONS.some((station) => Math.abs(s.pos - station.pos) < 52)
+    const nearStation = STATIONS.some((station) => !station.outdoor && Math.abs(s.pos - station.pos) < 52)
     const tunnelStretch = Math.floor(Math.max(0, s.pos) / 250) % 3 === 1
     group.visible = tunnelStretch || nearStation
     group.position.z = -s.pos
