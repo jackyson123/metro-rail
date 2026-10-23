@@ -35,7 +35,7 @@ export function Lights({ stateRef }: { stateRef: StateRef }) {
     const z = -s.pos
     const prox = stationProximity(s.pos)
 
-    const nearStation = prox.distance < 260
+    const nearStation = prox.distance < 260 && !prox.box.st.outdoor
     const tunnelStretch = Math.floor(Math.max(0, s.pos) / 250) % 3 === 1
     const outdoor = !tunnelStretch && !nearStation
     const weatherDim = s.weather === 'rain' ? 0.78 : 1
