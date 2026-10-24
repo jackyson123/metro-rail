@@ -61,6 +61,19 @@ function WeatherEffects({ stateRef }: { stateRef: StateRef }) {
   )
 }
 
+function PassingTrainAnimator({ stateRef, passingStateRef }: { stateRef: StateRef; passingStateRef: StateRef }) {
+  useFrame((_, dt) => {
+    const passing = passingStateRef.current
+    const player = stateRef.current
+    passing.pos = player ? player.pos + 22 - (performance.now() / 1000 * 12) % 140 : 80
+    passing.v = 8
+    passing.phase = 'running'
+    passing.doorsOpen = false
+    passing.time += dt
+  })
+  return null
+}
+
 function DoorAnimator({ stateRef, doorRef }: { stateRef: StateRef; doorRef: RefObject<number> }) {
   useFrame((_, dt) => {
     const s = stateRef.current
@@ -79,15 +92,6 @@ export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockI
   const passingDoorRef = useRef(0)
   const passingStateRef = useRef(createState())
   const family = useCjkFontFamily()
-  useFrame((_, dt) => {
-    const passing = passingStateRef.current
-    const player = stateRef.current
-    passing.pos = player ? player.pos + 22 - (performance.now() / 1000 * 12) % 140 : 80
-    passing.v = 8
-    passing.phase = 'running'
-    passing.doorsOpen = false
-    passing.time += dt
-  })
 
   return (
     <Canvas
@@ -102,6 +106,7 @@ export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockI
       <color attach="background" args={['#16212a']} />
       <fog attach="fog" args={['#17232b', 55, 520]} />
       <DoorAnimator stateRef={stateRef} doorRef={doorRef} />
+      <PassingTrainAnimator stateRef={stateRef} passingStateRef={passingStateRef} />
       <CameraRig stateRef={stateRef} mode={mode} />
       <Lights stateRef={stateRef} />
       <WeatherEffects stateRef={stateRef} />
