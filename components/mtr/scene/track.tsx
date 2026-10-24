@@ -3,12 +3,14 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import { SEG } from '@/lib/mtr/layout'
+import { STATIONS } from '@/lib/mtr/engine'
 import { concreteTexture, trackbedTexture } from '@/lib/mtr/textures'
 import { Repeater, type StateRef } from './instancing'
 
 const GAUGE_HALF = 0.7175
 const SLEEPER = 0.65
 const RAIL_LEN = 12
+const PLATFORM_LEN = 180
 
 function railProfile() {
   const s = new THREE.Shape()
@@ -33,6 +35,8 @@ export function Track({ stateRef }: { stateRef: StateRef }) {
     const bedGeo = new THREE.BoxGeometry(3.5, 0.3, SEG)
     const bedMat = new THREE.MeshStandardMaterial({ map: trackbedTexture([1, SEG / 3]), roughness: 0.96 })
 
+    const platformGeo = new THREE.BoxGeometry(1.25, 0.6, PLATFORM_LEN)
+    const platformMat = new THREE.MeshStandardMaterial({ color: '#59616a', roughness: 0.88 })
     const blockGeo = new THREE.BoxGeometry(0.62, 0.12, 0.26)
     const blockMat = new THREE.MeshStandardMaterial({ map: concreteTexture([0.3, 0.3]), color: '#c9c5bb', roughness: 0.9 })
 
@@ -55,6 +59,8 @@ export function Track({ stateRef }: { stateRef: StateRef }) {
     return {
       bedGeo,
       bedMat,
+      platformGeo,
+      platformMat,
       blockGeo,
       blockMat,
       padGeo,
@@ -77,6 +83,12 @@ export function Track({ stateRef }: { stateRef: StateRef }) {
 
   return (
     <group>
+      {[ -3.0, 5.0 ].map((x) => (
+        <Repeater key={x} stateRef={stateRef} spacing={PLATFORM_LEN} geometry={r.platformGeo} material={r.platformMat} place={(o, p) => {
+          o.position.set(x, 0.05, -(p + PLATFORM_LEN / 2))
+          return STATIONS.some((station) => Math.abs(station.pos - (p + PLATFORM_LEN / 2)) < PLATFORM_LEN / 2)
+        }} />
+      ))}
       <Repeater
         stateRef={stateRef}
         spacing={SEG}
@@ -162,6 +174,11 @@ export function Track({ stateRef }: { stateRef: StateRef }) {
           return true
         }}
       />
+      <group position={[3.8, 0, 0]}>
+        <Repeater stateRef={stateRef} spacing={SEG} geometry={r.bedGeo} material={r.bedMat} place={(o, p) => { o.position.set(0, -0.33, -(p + SEG / 2)); return true }} />
+        <Repeater stateRef={stateRef} spacing={SLEEPER} perSlot={2} geometry={r.blockGeo} material={r.blockMat} place={(o, p, k) => { o.position.set(side(k), -0.21, -p); return true }} />
+        <Repeater stateRef={stateRef} spacing={RAIL_LEN} perSlot={2} geometry={r.railGeo} material={r.railMat} place={(o, p, k) => { o.position.set(side(k), -0.15, -p - RAIL_LEN); return true }} />
+      </group>
       <Repeater
         stateRef={stateRef}
         spacing={8}
