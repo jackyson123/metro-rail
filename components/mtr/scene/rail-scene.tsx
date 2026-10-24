@@ -6,7 +6,7 @@ import { Environment, Lightformer } from '@react-three/drei'
 import { Bloom, EffectComposer, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import * as THREE from 'three'
-import { STATIONS } from '@/lib/mtr/engine'
+import { createState, STATIONS } from '@/lib/mtr/engine'
 import { type RollingStock } from '@/lib/mtr/rolling-stock'
 import { STATION_BOXES } from '@/lib/mtr/layout'
 import { CabInterior } from './cab-interior'
@@ -76,7 +76,18 @@ function DoorAnimator({ stateRef, doorRef }: { stateRef: StateRef; doorRef: RefO
 
 export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockId }: { stateRef: StateRef; mode: CameraMode; rollingStockId: RollingStock['id'] }) {
   const doorRef = useRef(0)
+  const passingDoorRef = useRef(0)
+  const passingStateRef = useRef(createState())
   const family = useCjkFontFamily()
+  useFrame((_, dt) => {
+    const passing = passingStateRef.current
+    const player = stateRef.current
+    passing.pos = player ? player.pos + 22 - (performance.now() / 1000 * 12) % 140 : 80
+    passing.v = 8
+    passing.phase = 'running'
+    passing.doorsOpen = false
+    passing.time += dt
+  })
 
   return (
     <Canvas
@@ -111,6 +122,7 @@ export const RailScene = memo(function RailScene({ stateRef, mode, rollingStockI
         ))}
       </Suspense>
       <Train key={rollingStockId} stateRef={stateRef} doorRef={doorRef} rollingStockId={rollingStockId} family={family} visible={mode !== 'cab'} />
+      <group position={[3.8, 0, 0]}><Train stateRef={passingStateRef} doorRef={passingDoorRef} rollingStockId={rollingStockId} family={family} visible={mode !== 'cab'} /></group>
       <CabInterior stateRef={stateRef} visible={mode === 'cab'} rollingStockId={rollingStockId} />
 
       <EffectComposer multisampling={4}>

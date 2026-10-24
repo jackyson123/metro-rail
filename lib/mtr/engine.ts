@@ -52,6 +52,7 @@ export function notchLabel(n: number) {
 
 export type Phase = 'ready' | 'running' | 'atStation' | 'boarding' | 'finished'
 export type Weather = 'clear' | 'rain'
+export type RouteDirection = 'eastbound' | 'westbound'
 export type OperatingEvent = 'signal' | 'doors' | 'passengers'
 
 export type ActiveEvent = {
@@ -94,6 +95,7 @@ export type GameState = {
   dayPhase: number
   activeEvent: ActiveEvent | null
   eventCount: number
+  direction: RouteDirection
 }
 
 export function createState(): GameState {
@@ -117,6 +119,7 @@ export function createState(): GameState {
     dayPhase: 0.28,
     activeEvent: null,
     eventCount: 0,
+    direction: 'eastbound',
   }
 }
 

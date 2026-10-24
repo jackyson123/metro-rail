@@ -5,6 +5,7 @@ import { DoorClosed, DoorOpen, Minus, OctagonAlert, Plus, RotateCcw, Volume2 } f
 import { Button } from '@/components/ui/button'
 import {
   type GameState,
+  type RouteDirection,
   STATIONS,
   closeDoors,
   createState,
@@ -66,6 +67,7 @@ export function Game() {
   const [view, setView] = useState<Snapshot>(() => snap(stateRef.current))
   const [camMode, setCamMode] = useState<CameraMode>('cab')
   const [rollingStockId, setRollingStockId] = useState<RollingStock['id']>('urban')
+  const [routeDirection, setRouteDirection] = useState<RouteDirection>('eastbound')
   const audioRef = useRef<AudioContext | null>(null)
   const previousDoor = useRef(false)
   const previousSpeed = useRef(0)
@@ -150,6 +152,7 @@ export function Game() {
 
   const restart = () => {
     stateRef.current = createState()
+    stateRef.current.direction = routeDirection
     setView(snap(stateRef.current))
     setStarted(true)
   }
@@ -176,6 +179,13 @@ export function Game() {
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3">
+          <label className="flex items-center gap-2 rounded-md border border-border bg-cab px-2.5 py-1.5 text-xs">
+            <span className="text-muted-foreground">行車方向</span>
+            <select value={routeDirection} onChange={(event) => setRouteDirection(event.target.value as RouteDirection)} className="bg-transparent font-bold outline-none" aria-label="選擇行車方向">
+              <option value="eastbound">西行：堅尼地城 → 柴灣</option>
+              <option value="westbound">東行：柴灣 → 堅尼地城</option>
+            </select>
+          </label>
           <label className="flex items-center gap-2 rounded-md border border-border bg-cab px-2.5 py-1.5 text-xs">
             <span className="text-muted-foreground">列車型號</span>
             <select
@@ -266,7 +276,7 @@ export function Game() {
               </div>
             )}
 
-            {!started && <IntroOverlay onStart={() => setStarted(true)} />}
+            {!started && <IntroOverlay onStart={() => { stateRef.current.direction = routeDirection; setStarted(true) }} />}
             {view.phase === 'finished' && <ResultScreen results={view.results} onRestart={restart} />}
           </div>
 
@@ -347,10 +357,10 @@ function IntroOverlay({ onStart }: { onStart: () => void }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm">
       <div className="flex max-w-lg flex-col gap-4 text-center">
-        <p className="text-sm font-bold text-accent">港島綫 · 堅尼地城 → 金鐘</p>
+        <p className="text-sm font-bold text-accent">港島綫 · 堅尼地城 ↔ 柴灣</p>
         <h2 className="text-2xl font-bold text-balance md:text-4xl">今日由你揸車</h2>
         <p className="text-sm leading-relaxed text-pretty text-muted-foreground md:text-base">
-          你係港鐵車長，要準時、安全咁將列車駛經五個車站。每站都要準確停喺黃色「停」字停車牌前，開門俾乘客上落，再關門開車。
+          你係港鐵車長，要準時、安全咁將列車駛經港島綫各站。每站都要準確停喺黃色「停」字停車牌前，開門俾乘客上落，再關門開車。
         </p>
         <div className="flex justify-center">
           <Button size="lg" onClick={onStart}>
