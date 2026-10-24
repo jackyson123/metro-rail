@@ -44,11 +44,21 @@ function WeatherEffects({ stateRef }: { stateRef: StateRef }) {
     rain.current.rotation.z += dt * 0.08
   })
   const positions = useMemo(() => {
-    const a = new Float32Array(420 * 3)
-    for (let i = 0; i < 420; i += 1) { a[i * 3] = (i % 28) - 14; a[i * 3 + 1] = (i % 15) * 0.35; a[i * 3 + 2] = -((i * 7) % 24) }
+    const count = 900
+    const a = new Float32Array(count * 3)
+    for (let i = 0; i < count; i += 1) {
+      a[i * 3] = ((i * 37) % 280) / 10 - 14
+      a[i * 3 + 1] = ((i * 53) % 90) / 10
+      a[i * 3 + 2] = -((i * 71) % 300) / 10
+    }
     return a
   }, [])
-  return <points ref={rain} position={[0, 0, -10]}><bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry><pointsMaterial color="#a8c9e8" size={0.045} transparent opacity={0.55} /></points>
+  return (
+    <points ref={rain} position={[0, -0.5, -3]}>
+      <bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry>
+      <pointsMaterial color="#b9ddff" size={0.075} transparent opacity={0.78} sizeAttenuation />
+    </points>
+  )
 }
 
 function DoorAnimator({ stateRef, doorRef }: { stateRef: StateRef; doorRef: RefObject<number> }) {

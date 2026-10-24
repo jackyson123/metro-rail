@@ -14,8 +14,18 @@ export const STATIONS: Station[] = [
   { zh: '西營盤', en: 'Sai Ying Pun', pos: 1820, tile: [196, 152, 52] },
   { zh: '上環', en: 'Sheung Wan', pos: 2780, tile: [92, 110, 160] },
   { zh: '中環', en: 'Central', pos: 3700, tile: [52, 128, 80], outdoor: true },
-  { zh: '灣仔', en: 'Wan Chai', pos: 5350, tile: [158, 92, 56] },
   { zh: '金鐘', en: 'Admiralty', pos: 4560, tile: [44, 96, 170] },
+  { zh: '灣仔', en: 'Wan Chai', pos: 5350, tile: [158, 92, 56], outdoor: true },
+  { zh: '銅鑼灣', en: 'Causeway Bay', pos: 6200, tile: [174, 84, 104] },
+  { zh: '天后', en: 'Tin Hau', pos: 7050, tile: [82, 136, 126], outdoor: true },
+  { zh: '炮台山', en: 'Fortress Hill', pos: 7900, tile: [116, 98, 164] },
+  { zh: '北角', en: 'North Point', pos: 8750, tile: [206, 132, 62], outdoor: true },
+  { zh: '鰂魚涌', en: 'Quarry Bay', pos: 9600, tile: [58, 132, 176] },
+  { zh: '太古', en: 'Tai Koo', pos: 10450, tile: [188, 92, 68], outdoor: true },
+  { zh: '西灣河', en: 'Sai Wan Ho', pos: 11300, tile: [76, 148, 102] },
+  { zh: '筲箕灣', en: 'Shau Kei Wan', pos: 12150, tile: [144, 112, 58], outdoor: true },
+  { zh: '杏花邨', en: 'Heng Fa Chuen', pos: 13000, tile: [72, 126, 156], outdoor: true },
+  { zh: '柴灣', en: 'Chai Wan', pos: 13850, tile: [172, 76, 92], outdoor: true },
 ]
 
 export const SPEED_ZONES: SpeedZone[] = [
